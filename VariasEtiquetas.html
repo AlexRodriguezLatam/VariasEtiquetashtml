@@ -1,188 +1,146 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Etiquetas de Envío Múltiples</title>
-<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
-<style>
-  @page {
-    size: A4 portrait; /* Cambia a A4 vertical para acomodar varias etiquetas */
-    margin: 5mm;
-  }
-  body {
-    font-family: 'Trebuchet MS', 'Arial', sans-serif;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    overflow: hidden;
-  }
-  /* Contenedor para todas las etiquetas */
-  .etiquetas-multiples {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  .contenedor-etiqueta {
-    width: 148mm; /* Ancho A6 landscape */
-    height: 105mm; /* Altura A6 landscape */
-    box-sizing: border-box;
-    padding: 5mm;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    border: 1px solid black;
-    margin-bottom: 10mm; /* Espacio entre etiquetas */
-    page-break-after: always; /* Salto de página después de cada etiqueta */
-  }
-  .logo-empresa {
-    font-size: 1.2em;
-    font-weight: bold;
-    margin-bottom: 5mm;
-    text-align: center;
-    width: 100%;
-    padding-bottom: 2mm;
-  }
-  .section-box {
-    width: calc(100% - 2mm);
-    margin-bottom: 5mm;
-    padding: 3mm;
-    text-align: center;
-  }
-  #barcode-container {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    margin-bottom: 2mm;
-  }
-  .barcode { /* Usamos una clase en lugar de un ID */
-    width: 120mm;
-    height: 30mm;
-  }
-  .barcode-text {
-    font-weight: bold;
-    word-break: break-all;
-    padding-bottom: 2mm;
-  }
-  .data-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.9em;
-  }
-  .data-table th, .data-table td {
-    border: 1px solid black;
-    padding: 4mm 2mm;
-    text-align: center;
-  }
-  .data-table th {
-    background-color: #858585;
-    font-weight: bold;
-  }
-  @media print {
+  <title>Etiquetas por AWB</title>
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+  <style>
+    @page {
+      size: A6 landscape;
+      margin: 0;
+    }
+
     body {
+      font-family: 'Trebuchet MS', 'Arial', sans-serif;
       margin: 0;
       padding: 0;
     }
+
     .contenedor-etiqueta {
-      box-shadow: none;
+      width: 148mm;
+      height: 105mm;
+      box-sizing: border-box;
+      padding: 5mm;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       border: 1px solid black;
+      page-break-after: always;
     }
+
+    .logo-empresa {
+      font-size: 1.2em;
+      font-weight: bold;
+      margin-bottom: 5mm;
+      text-align: center;
+      width: 100%;
+    }
+
     .section-box {
-      border: none;
+      width: calc(100% - 2mm);
+      margin-bottom: 5mm;
+      padding: 3mm;
+      text-align: center;
     }
-  }
-</style>
+
+    .barcode-text {
+      font-weight: bold;
+      word-break: break-word;
+      padding-bottom: 2mm;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9em;
+    }
+
+    .data-table th, .data-table td {
+      border: 1px solid black;
+      padding: 4mm 2mm;
+      text-align: center;
+    }
+
+    .data-table th {
+      background-color: #858585;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
+  <div id="contenedor-etiquetas"></div>
 
-<div class="etiquetas-multiples"></div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      const id_awb = params.get('id_awb');
 
-<div id="template-etiqueta" style="display: none;">
-  <div class="contenedor-etiqueta">
-    <div class="logo-empresa"></div>
-    <div class="section-box">
-      <div class="barcode-container">
-        <svg class="barcode"></svg>
-      </div>
-      <div class="barcode-text"></div>
-    </div>
-    <div class="section-box">
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>PCS</th>
-            <th>DESTINO</th>
-            <th>SKID</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td class="pcs-value"></td>
-            <td class="destino-value"></td>
-            <td class="skid-value"></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</div>
+      // Simulación de datos LABEL (puedes reemplazar esto con fetch desde JSON o Google Sheets)
+      const etiquetas = [
+        {
+          awb: "123456",
+          sku: "ABC-001",
+          pcs: "10",
+          destino: "Bogotá",
+          skid: "SK01",
+          ref: "ABC001",
+          empresa: "E-CARGO TOLEDO"
+        },
+        {
+          awb: "123456",
+          sku: "ABC-002",
+          pcs: "5",
+          destino: "Medellín",
+          skid: "SK02",
+          ref: "ABC002",
+          empresa: "E-CARGO TOLEDO"
+        }
+      ];
 
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const dataParam = urlParams.get('data');
-    const etiquetasContainer = document.querySelector('.etiquetas-multiples');
-    const template = document.getElementById('template-etiqueta').innerHTML;
+      const contenedor = document.getElementById('contenedor-etiquetas');
 
-    if (dataParam) {
-      try {
-        const etiquetasData = JSON.parse(decodeURIComponent(dataParam));
+      etiquetas
+        .filter(e => e.awb === id_awb)
+        .forEach((etiqueta, index) => {
+          const div = document.createElement('div');
+          div.className = 'contenedor-etiqueta';
+          div.innerHTML = `
+            <div class="logo-empresa">${etiqueta.empresa}</div>
+            <div class="section-box">
+              <div id="barcode-container-${index}">
+                <svg id="barcode-${index}"></svg>
+              </div>
+              <div class="barcode-text">${etiqueta.sku}</div>
+            </div>
+            <div class="section-box">
+              <table class="data-table">
+                <thead>
+                  <tr><th>PCS</th><th>DESTINO</th><th>SKID</th></tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>${etiqueta.pcs}</td>
+                    <td>${etiqueta.destino}</td>
+                    <td>${etiqueta.skid}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          `;
+          contenedor.appendChild(div);
 
-        etiquetasData.forEach((item, index) => {
-          const newEtiqueta = document.createElement('div');
-          newEtiqueta.innerHTML = template;
-
-          const empresaElement = newEtiqueta.querySelector('.logo-empresa');
-          const barcodeTextElement = newEtiqueta.querySelector('.barcode-text');
-          const pcsElement = newEtiqueta.querySelector('.pcs-value');
-          const destinoElement = newEtiqueta.querySelector('.destino-value');
-          const skidElement = newEtiqueta.querySelector('.skid-value');
-          const barcodeSvg = newEtiqueta.querySelector('.barcode');
-
-          empresaElement.innerText = item.empresa || 'E-CARGO TOLEDO';
-          barcodeTextElement.innerText = item.sku || 'N/A';
-          pcsElement.innerText = item.pcs || 'N/A';
-          destinoElement.innerText = item.destino || 'N/A';
-          skidElement.innerText = item.skid || 'N/A';
-          
-          if (item.sku && item.sku !== 'N/A') {
-            JsBarcode(barcodeSvg, item.sku, {
-              format: "CODE128",
-              displayValue: false,
-              height: 80,
-              width: 1.5,
-              margin: 0,
-            });
-          } else {
-            newEtiqueta.querySelector('.barcode-container').style.display = 'none';
-          }
-          
-          etiquetasContainer.appendChild(newEtiqueta);
+          JsBarcode(`#barcode-${index}`, etiqueta.sku, {
+            format: "CODE128",
+            displayValue: false,
+            height: 80,
+            width: 1.5,
+            margin: 0,
+          });
         });
 
-        // Espera un momento antes de imprimir para asegurar que los elementos estén renderizados
-        setTimeout(() => {
-          window.print();
-        }, 500);
-
-      } catch (e) {
-        console.error("Error al parsear los datos JSON:", e);
-        // Opcional: mostrar un mensaje de error al usuario
-      }
-    } else {
-      console.error("No se encontraron datos en la URL.");
-    }
-  });
-</script>
+      setTimeout(() => {
+        window.print();
+      }, 1000);
+    });
+  </script>
 </body>
 </html>
